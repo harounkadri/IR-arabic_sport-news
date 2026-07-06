@@ -103,8 +103,6 @@ class ArabicPreprocessor:
         
         text = text.replace('ـ', '')
         
-        text = re.sub(r'[0-9]', '', text)
-        
         text = re.sub(r'\s+', ' ', text).strip()
         
         return text
@@ -117,7 +115,7 @@ class ArabicPreprocessor:
         
         cleaned_text = re.sub(r'\s+', ' ', cleaned_text).strip()
         
-        tokens = re.findall(r'[\u0600-\u06FF]+', cleaned_text)
+        tokens = re.findall(r'[\u0600-\u06FF0-9]+', cleaned_text)
         
         cleaned_tokens = []
         for token in tokens:

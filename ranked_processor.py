@@ -145,10 +145,4 @@ class RankedProcessor:
         
         sorted_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)
         
-        if sorted_scores:
-            max_score = sorted_scores[0][1]
-            if max_score > 0:
-                normalized = [(doc_id, score/max_score) for doc_id, score in sorted_scores]
-                return normalized[:top_k]
-        
         return sorted_scores[:top_k]

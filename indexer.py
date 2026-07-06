@@ -53,13 +53,13 @@ class PositionalIndexer:
         return problem_count
     
     def _has_non_arabic(self, text):
-        arabic_pattern = re.compile(r'^[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]+$')
+        arabic_pattern = re.compile(r'^[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF0-9]+$')
         return not arabic_pattern.match(text)
     
     def filter_arabic_only(self):
         print("Filtrage des termes arabes seulement...")
         
-        arabic_pattern = re.compile(r'^[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]+$')
+        arabic_pattern = re.compile(r'^[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF0-9]+$')
         arabic_index = {}
         
         terms_removed = []

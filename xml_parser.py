@@ -7,7 +7,27 @@ class XMLParser:
     
     def parse(self):
         documents = []
-        
+        try:
+            context = ET.iterparse(self.xml_file, events=('end',))
+            for event, elem in context:
+                if elem.tag == 'Article':
+                    doc = self._extract_article(elem)
+                    if doc and doc['id'] and doc['full_text'].strip():
+                        documents.append(doc)
+                    elem.clear()
+            
+            print(f"✓ {len(documents)} documents parsés depuis {self.xml_file} (iterparse)")
+            return documents
+            
+        except ET.ParseError:
+            print("⚠️ Fichier XML malformé, utilisation du parseur de secours (en mémoire)...")
+            return self._parse_fallback()
+        except Exception as e:
+            print(f"✗ Erreur parsing XML: {e}")
+            return []
+
+    def _parse_fallback(self):
+        documents = []
         try:
             with open(self.xml_file, 'r', encoding='utf-8') as f:
                 content = f.read()
@@ -20,11 +40,11 @@ class XMLParser:
                 if doc and doc['id'] and doc['full_text'].strip():
                     documents.append(doc)
             
-            print(f"✓ {len(documents)} documents parsés depuis {self.xml_file}")
+            print(f"✓ {len(documents)} documents parsés depuis {self.xml_file} (fallback)")
             return documents
             
         except Exception as e:
-            print(f"✗ Erreur parsing XML: {e}")
+            print(f"✗ Erreur parsing XML fallback: {e}")
             return []
     
     def _clean_xml(self, content):

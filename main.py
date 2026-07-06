@@ -1,5 +1,13 @@
 import time
 import os
+import sys
+import io
+
+# Force stdout/stderr to utf-8 to avoid charmap encoding errors on Windows
+if sys.stdout is not None and hasattr(sys.stdout, 'buffer'):
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+if sys.stderr is not None and hasattr(sys.stderr, 'buffer'):
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
 import tkinter as tk
 from tkinter import ttk, scrolledtext, messagebox
 from config import *
@@ -280,18 +288,29 @@ class SearchSystemGUI:
             return []
         
         for i, (doc_id, score) in enumerate(results[:15], 1):
-            if score > 0.8:
-                confidence = "🟢 Excellente"
-                color = "green"
-            elif score > 0.5:
-                confidence = "🟡 Bonne"
-                color = "orange"
-            elif score > 0.2:
-                confidence = "🟠 Faible"
-                color = "#FFA500"
+            if algo_name == "Cosine":
+                if score > 0.8:
+                    confidence = "🟢 Excellente"
+                    color = "green"
+                elif score > 0.5:
+                    confidence = "🟡 Bonne"
+                    color = "orange"
+                elif score > 0.2:
+                    confidence = "🟠 Faible"
+                    color = "#FFA500"
+                else:
+                    confidence = "🔴 Très faible"
+                    color = "red"
             else:
-                confidence = "🔴 Très faible"
-                color = "red"
+                if i <= 3:
+                    confidence = "🟢 Top 3"
+                    color = "green"
+                elif i <= 10:
+                    confidence = "🟡 Top 10"
+                    color = "orange"
+                else:
+                    confidence = "⚪ Classé"
+                    color = "gray"
             
             details = f"Score: {score:.4f}"
             
