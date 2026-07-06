@@ -177,7 +177,7 @@ class ArabicPreprocessor:
                             stemmed_tokens.append(stemmed)
                         else:
                             stemmed_tokens.append(token)
-                    except:
+                    except Exception:
                         stemmed_tokens.append(token)
                 tokens = stemmed_tokens
         

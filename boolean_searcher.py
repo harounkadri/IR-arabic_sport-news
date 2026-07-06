@@ -180,11 +180,14 @@ class BooleanSearcher:
     
     def _check_exact_phrase_order(self, terms, doc_id):
         positions = []
-        for term in terms:
+        for i, term in enumerate(terms):
             term_positions = self.indexer.get_positions(term, doc_id)
             if not term_positions:
                 return False
-            positions.append(sorted(term_positions))
+            if i == 0:
+                positions.append(sorted(term_positions))
+            else:
+                positions.append(set(term_positions))
         
         for start_pos in positions[0]:
             match = True

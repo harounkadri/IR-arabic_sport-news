@@ -314,13 +314,20 @@ class SearchSystemGUI:
         return results
     
     def _log(self, message):
+        self.root.after(0, self._log_ui, message)
+        
+    def _log_ui(self, message):
         timestamp = time.strftime("%H:%M:%S")
         self.log_text.insert(tk.END, f"[{timestamp}] {message}\n")
         self.log_text.see(tk.END)
         self.root.update_idletasks()
     
     def _initialize_system(self):
-        self.status_bar.config(text="Initialisation du système...")
+        import threading
+        threading.Thread(target=self._initialize_worker, daemon=True).start()
+        
+    def _initialize_worker(self):
+        self.root.after(0, lambda: self.status_bar.config(text="Initialisation du système..."))
         self._log("=" * 70)
         self._log("INITIALISATION DU SYSTÈME DE RECHERCHE")
         self._log("=" * 70)
@@ -329,8 +336,8 @@ class SearchSystemGUI:
             self._log("📁 Vérification des fichiers...")
             if not os.path.exists(DATA_FILE):
                 self._log(f"❌ FICHIER MANQUANT: {DATA_FILE}")
-                messagebox.showerror("Fichier manquant", 
-                                   f"Le fichier {DATA_FILE} est requis.")
+                self.root.after(0, lambda: messagebox.showerror("Fichier manquant", 
+                                   f"Le fichier {DATA_FILE} est requis."))
                 return
             
             self._log("🔧 Initialisation du préprocesseur...")
@@ -384,23 +391,25 @@ class SearchSystemGUI:
             self._log(f"   Protection activée dans GUI: {self.protect_words.get()}")
             self._log("=" * 70)
             
-            self.query_entry.config(state='normal')
-            self.status_bar.config(text=f"✅ Prêt! {len(self.documents)} documents indexés")
-            
-            protection_status = "activée" if self.preprocessor.protected_words and self.protect_words.get() else "désactivée"
-            messagebox.showinfo("Système prêt", 
-                              f"Système initialisé avec succès!\n\n"
-                              f"• Documents: {len(self.documents)}\n"
-                              f"• Termes uniques: {len(self.indexer.index)}\n"
-                              f"• Mots protégés: {len(self.preprocessor.protected_words)}\n"
-                              f"• Protection des mots: {protection_status}\n\n"
-                              f"Vous pouvez maintenant effectuer des recherches.")
+            self.root.after(0, self._on_init_success)
             
         except Exception as e:
             self._log(f"❌ ERREUR D'INITIALISATION: {str(e)}")
             import traceback
             self._log(traceback.format_exc())
-            messagebox.showerror("Erreur", f"Erreur d'initialisation:\n{str(e)}")
+            self.root.after(0, lambda err=e: messagebox.showerror("Erreur", f"Erreur d'initialisation:\n{str(err)}"))
+            
+    def _on_init_success(self):
+        self.query_entry.config(state='normal')
+        self.status_bar.config(text=f"✅ Prêt! {len(self.documents)} documents indexés")
+        protection_status = "activée" if self.preprocessor.protected_words and self.protect_words.get() else "désactivée"
+        messagebox.showinfo("Système prêt", 
+                          f"Système initialisé avec succès!\n\n"
+                          f"• Documents: {len(self.documents)}\n"
+                          f"• Termes uniques: {len(self.indexer.index)}\n"
+                          f"• Mots protégés: {len(self.preprocessor.protected_words)}\n"
+                          f"• Protection des mots: {protection_status}\n\n"
+                          f"Vous pouvez maintenant effectuer des recherches.")
     
     def _process_predefined_queries(self):
         bool_queries = read_queries_from_file(QUERIES_BOOLEAN)
@@ -429,7 +438,7 @@ if __name__ == "__main__":
     try:
         import nltk
         nltk.data.find('tokenizers/punkt')
-    except:
+    except Exception:
         print("Installation de NLTK...")
         nltk.download('punkt', quiet=True)
     

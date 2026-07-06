@@ -21,7 +21,8 @@ def read_queries_from_file(filename):
         
         return queries
         
-    except Exception:
+    except Exception as e:
+        print(f"Erreur de lecture des requêtes: {e}")
         return {}
 
 def save_boolean_results(results, filename):
@@ -31,7 +32,8 @@ def save_boolean_results(results, filename):
                 for doc_id in sorted(doc_ids, key=lambda x: int(x)):
                     f.write(f"{query_id},{doc_id}\n")
         return True
-    except Exception:
+    except Exception as e:
+        print(f"Erreur de sauvegarde booléenne: {e}")
         return False
 
 def save_ranked_results(results, filename):
@@ -41,5 +43,6 @@ def save_ranked_results(results, filename):
                 for doc_id, score in doc_scores:
                     f.write(f"{query_id},{doc_id},{score:.4f}\n")
         return True
-    except Exception:
+    except Exception as e:
+        print(f"Erreur de sauvegarde ranking: {e}")
         return False
